@@ -1,0 +1,24 @@
+{
+  "name": "tcp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node ./bootstrap.js",
+    "dev": "cross-env NODE_ENV=local midway-bin dev --ts  --entryFile=bootstrap.js",
+    "build": "midway-bin build -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@midwayjs/cli": "^1.2.74",
+    "cross-env": "^7.0.3",
+    "types-uart": "^1.1.2"
+  },
+  "dependencies": {
+    "@cairui/midway-tcpserver": "^1.0.0",
+    "@midwayjs/bootstrap": "^2.11.4",
+    "@midwayjs/core": "^2.11.4",
+    "@midwayjs/decorator": "^2.11.1"
+  }
+}
