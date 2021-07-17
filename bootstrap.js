@@ -1,8 +1,11 @@
-const Framework = require('@cairui/midway-tcpserver').Framework;
-const framework = new Framework().configure({
+const TcpServer = require('@cairui/midway-tcpserver').Framework;
+const tcpServer = new TcpServer().configure({
   port: 9000,
   host: "0.0.0.0"
 });
 
+
 const { Bootstrap } = require('@midwayjs/bootstrap');
-Bootstrap.load(framework).run();
+Bootstrap
+  .load(tcpServer)
+  .run();

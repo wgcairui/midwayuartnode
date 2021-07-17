@@ -19,6 +19,7 @@
     "@cairui/midway-tcpserver": "^1.0.0",
     "@midwayjs/bootstrap": "^2.11.4",
     "@midwayjs/core": "^2.11.4",
-    "@midwayjs/decorator": "^2.11.1"
+    "@midwayjs/decorator": "^2.11.1",
+    "socket.io-client": "^4.1.3"
   }
 }
