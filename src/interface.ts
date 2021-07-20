@@ -176,6 +176,14 @@ export enum EVENT {
     /**
      *  DTU AT指令
      */
-    DTUoprate = 'DTUoprate'
-
+    DTUoprate = 'DTUoprate',
+    /**
+     * 操作指令结果
+     */
+    deviceopratesuccess = "deviceopratesuccess",
+    /**
+     * AT指令结果
+     * 
+     */
+     dtuopratesuccess = "dtuopratesuccess"
 }

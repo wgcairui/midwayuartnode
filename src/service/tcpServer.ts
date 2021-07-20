@@ -65,13 +65,13 @@ export class TcpServerService {
      * @param mac 
      */
     awaitDtu(mac: string) {
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<Context>((resolve, reject) => {
             const socket = this.Cache.socket.get(mac)
             // 如果没有socket,弹出错误
             if (!socket) reject()
             // 如果socket没有锁,resolve
             if (!socket.Property.lock) {
-                resolve()
+                resolve(socket)
             } else {
                 // 监听解锁
                 socket.once("unlock", resolve)
@@ -98,18 +98,35 @@ export class TcpServerService {
      * 给dtu标注锁状态
      * @param mac 
      */
-    private lock(socket: Context) {
+    lock(socket: Context) {
         socket.Property.lock = true
-        socket.emit("lock")
+        socket.emit("lock", socket)
     }
 
     /**
      * 给dtu标注解锁状态
      * @param mac 
      */
-    private unlock(socket: Context) {
+    unlock(socket: Context) {
         socket.Property.lock = false
-        socket.emit("unlock")
+        socket.emit("unlock", socket)
+    }
+
+    /**
+     * 判断socket是否未上锁
+     * @param mac 
+     * @returns 
+     */
+    isfree(mac: string) {
+        const socket = this.Cache.socket.get(mac)
+        return Boolean(socket && !socket.Property.lock)
+    }
+
+    /**
+   * 重启socket
+   */
+    resatrtSocket(socket: Context) {
+        this.QueryAT(socket, "Z")
     }
 
     /**
@@ -130,8 +147,8 @@ export class TcpServerService {
                 socket.Property.jw = (await this.QueryAT(socket, "LOCATE=1")).msg
                 socket.Property.uart = (await this.QueryAT(socket, "UART=1")).msg
             }
-            console.log({ p: socket.Property,AT, msg });
-
+            console.log({ p: socket.Property, AT, msg });
+            this.unlock(socket)
             return socket.Property
         })
     }
@@ -143,7 +160,7 @@ export class TcpServerService {
     private async QueryAT(socket: Context, content: string) {
         // 组装操作指令
         const queryString = Buffer.from('+++AT+' + content + "\r", "utf-8")
-        const { buffer } = await this.write(socket, queryString)
+        const { buffer } = await this.write(socket, queryString, false)
         return this.tool.ATParse(buffer)
     }
 
@@ -152,9 +169,9 @@ export class TcpServerService {
      * 查询操作,查询会锁住端口状态,完成后解锁
      * @param content 组装好的dtu查询指令
      * @param timeOut 超时时间
-     * @param lock socket锁状态
+     * @param unlock 请求完是否解锁
      */
-    async write(socket: Context, content: Buffer, timeOut: number = 10000, lock: boolean = false) {
+    async write(socket: Context, content: Buffer, unlock: boolean = true) {
         this.lock(socket)
         const data = await new Promise<socketResult>((resolve) => {
             // 记录socket.bytes
@@ -164,7 +181,7 @@ export class TcpServerService {
             // 防止超时
             const time = setTimeout(() => {
                 socket.emit('data', 'timeOut')
-            }, timeOut)
+            }, 10000)
             socket.once("data", buffer => {
                 clearTimeout(time)
                 resolve({ buffer, useTime: Date.now() - startTime, useByte: this.getBytes(socket) - Bytes })
@@ -178,7 +195,7 @@ export class TcpServerService {
                 socket.destroy()
             }
         })
-        this.unlock(socket)
+        if (unlock) this.unlock(socket)
         return data
     }
 

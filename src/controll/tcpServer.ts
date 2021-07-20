@@ -19,7 +19,7 @@ export class TcpControll {
     TcpServerService: TcpServerService
 
     @Inject()
-    ioClientService: ioClientService
+    ioClientService: ioClientService 
 
     @Inject()
     Fetch: Fetch
@@ -35,10 +35,9 @@ export class TcpControll {
             if (socket && !socket.destroyed && socket.writable) {
                 socket.write(Buffer.from('+++AT+NREGEN=A,on\r', "utf-8"))
                 socket.write(Buffer.from('+++AT+NREGDT=A,register&mac=%MAC&host=%HOST\r', "utf-8"))
-                /* if (this.conf.UserID) {
-                    socket.write(Buffer.from(`+++AT+IOTUID=${this.conf.UserID}\r`, "utf-8"))
-                } */
-
+                if (this.Cache.registerConfig?.UserID) {
+                    socket.write(Buffer.from(`+++AT+IOTUID=${this.Cache.registerConfig.UserID}\r`, "utf-8"))
+                } 
             }
         }, 10000);
 
@@ -84,14 +83,6 @@ export class TcpControll {
                     this.Fetch.dtuInfo(dtuInfo)
 
                     this.ioClientService.terminalOn(mac, false)
-                    /* const client = this.MacSocketMaps.get(mac)
-                    if (client) {
-                        client.reConnectSocket(socket)
-                    } else {
-                        // 使用proxy代理dtu对象
-                        this.MacSocketMaps.set(mac, new Proxy(new Client(socket, mac, registerArguments), ProxyClient))
-                        console.log(`${new Date().toLocaleString()} ## ${mac}  上线,连接参数: ${socket.remoteAddress}:${socket.remotePort},Tcp Server连接数: ${await this.TcpServerService.getConnections()}`);
-                    } */
                 } else {
                     socket.end('please register DTU IMEI', () => {
                         console.log(`###${socket.remoteAddress}:${socket.remotePort} 配置错误或非法连接,销毁连接,[${data.toString()}]`);
