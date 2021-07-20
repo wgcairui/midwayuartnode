@@ -2,6 +2,8 @@ import { Provide, Inject } from "@midwayjs/decorator"
 import { TCPControll, OnConnection, Context, OnDisConnection, OnTCPMessage } from "@cairui/midway-tcpserver"
 import { Cache } from "../service/cache"
 import { TcpServerService } from "../service/tcpServer"
+import { ioClientService } from "../service/ioClient"
+import { Fetch } from "../service/fetch"
 
 @Provide()
 @TCPControll()
@@ -15,6 +17,13 @@ export class TcpControll {
 
     @Inject()
     TcpServerService: TcpServerService
+
+    @Inject()
+    ioClientService: ioClientService
+
+    @Inject()
+    Fetch: Fetch
+
 
     @OnConnection()
     async connecting() {
@@ -48,11 +57,33 @@ export class TcpControll {
                     const mac = IMEI.slice(maclen - 12, maclen);
                     console.log(`${new Date().toLocaleString()} ## ${mac}  上线,连接参数: ${socket.remoteAddress}:${socket.remotePort},Tcp Server连接数: ${await this.TcpServerService.getConnections()}`);
 
+                    socket.Property = {
+                        mac,
+                        port: socket.remotePort,
+                        ip: socket.remoteAddress,
+                        lock: false
+                    }
+
                     socket
                         .setKeepAlive(true, 1e5)
                         .setNoDelay(true)
+                        .on("error", (err) => {
+                            console.error({ mac, type: 'socket connect error', time: new Date(), code: err.name, message: err.message, stack: err.stack });
+                            // this.socket.destroy(err)
+                            this.TcpServerService.dtuOffline(socket)
+                        })
+                        .on("timeout", () => {
+                            console.log(`### timeout==${socket.Property.ip}:${socket.Property.port}::${socket.Property.mac}`);
+                            this.TcpServerService.dtuOffline(socket)
+                        })
+
 
                     this.Cache.socket.set(mac, socket)
+
+                    const dtuInfo = await this.TcpServerService.getDtuInfo(socket)
+                    this.Fetch.dtuInfo(dtuInfo)
+
+                    this.ioClientService.terminalOn(mac, false)
                     /* const client = this.MacSocketMaps.get(mac)
                     if (client) {
                         client.reConnectSocket(socket)
@@ -78,7 +109,7 @@ export class TcpControll {
 
     @OnTCPMessage("data")
     async data(data: Buffer) {
-        console.log({ data });
+        //console.log({ data ,id:this.ioClientService.ioClient});
 
     }
 
@@ -86,10 +117,12 @@ export class TcpControll {
     async error(err: Error) {
         console.error(`socket error:${err.message}`, err);
         this.ctx.destroy()
+        this.TcpServerService.dtuOffline(this.ctx)
     }
 
     @OnTCPMessage("timeout")
     async timeout() {
         console.log(`### timeout==${this.ctx.remoteAddress}:${this.ctx.remotePort}::`);
+        this.TcpServerService.dtuOffline(this.ctx)
     }
 }

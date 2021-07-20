@@ -12,14 +12,15 @@
   "license": "ISC",
   "devDependencies": {
     "@midwayjs/cli": "^1.2.74",
+    "@midwayjs/core": "^2.11.4",
+    "@midwayjs/decorator": "^2.11.1",
     "cross-env": "^7.0.3",
     "types-uart": "^1.1.2"
   },
   "dependencies": {
+    "@cairui/midway-io.client": "^1.0.0",
     "@cairui/midway-tcpserver": "^1.0.0",
     "@midwayjs/bootstrap": "^2.11.4",
-    "@midwayjs/core": "^2.11.4",
-    "@midwayjs/decorator": "^2.11.1",
-    "socket.io-client": "^4.1.3"
+    "axios": "^0.21.1"
   }
 }
