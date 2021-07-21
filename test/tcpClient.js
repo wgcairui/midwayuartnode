@@ -1,5 +1,5 @@
 var net = require('net');
-var client = net.connect({ port: 9000,host:"192.168.1.61" }, function () { //'connect' listener
+var client = net.connect({ port: 9000,host:"120.202.61.88" }, function () { //'connect' listener
     console.log('client connected');
     client.write('world!\r\n');
 });

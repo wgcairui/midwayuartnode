@@ -122,7 +122,7 @@ export class IOClientControll {
                 // 构建查询字符串转换Buffer
                 const queryString = Query.type === 485 ? Buffer.from(content, "hex") : Buffer.from(content + "\r", "utf-8");
                 // 持续占用端口,知道最后一个释放端口
-                console.log(i);
+                // console.log(i);
                 const data = await this.TcpServerService.write(socket, queryString, i === 0)
                 IntructQueryResults.push({ content, ...data });
             }
@@ -165,7 +165,7 @@ export class IOClientControll {
                 const SuccessResult = Object.assign<queryObjectServer, Partial<queryOkUp>>(Query, { contents, time: new Date().toString() }) as queryOkUp;
 
                 // 加入结果集
-                console.log(SuccessResult);
+                //console.log(SuccessResult);
 
                 this.Fetch.queryData(SuccessResult)
             }
@@ -231,16 +231,17 @@ export class IOClientControll {
             const { buffer } = await this.TcpServerService.write(socket, queryString, false)
             result.upserted = buffer
             const parse = this.TcpServerService.tool.ATParse(buffer)
-            if (parse.AT && !parse.msg) {
+            if (parse.AT && parse.msg) {
                 result.ok = 1
                 result.msg = parse.msg
                 this.TcpServerService.getDtuInfo(socket).then(el => {
                     this.Fetch.dtuInfo(el)
-                    this.TcpServerService.unlock(socket)
+                    // this.TcpServerService.unlock(socket)
                 })
+                this.TcpServerService.unlock(socket)
             }
 
-            console.log({ Query, result });
+            console.log({ Query, parse, p: socket.Property.lock });
             return [Query.events, result]
         }).catch(() => {
             console.log(`${EVENT.instructQuery} is error`, Query);

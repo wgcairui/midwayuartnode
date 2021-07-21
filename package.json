@@ -6,7 +6,9 @@
   "scripts": {
     "start": "NODE_ENV=production node ./bootstrap.js",
     "dev": "cross-env NODE_ENV=local midway-bin dev --ts  --entryFile=bootstrap.js",
-    "build": "midway-bin build -c"
+    "build": "midway-bin build -c",
+    "build:docker": "npm run build && sudo docker build -t midwayuartserver .",
+    "run:docker": "sudo docker stop midwayuartserver && sudo docker rm midwayuartserver && sudo docker run -itd --name midwayuartserver --restart always --init -p 9000:9000 midwayuartserver"
   },
   "author": "",
   "license": "ISC",
@@ -18,8 +20,8 @@
     "types-uart": "^1.1.2"
   },
   "dependencies": {
-    "@cairui/midway-io.client": "^1.0.0",
-    "@cairui/midway-tcpserver": "^1.0.0",
+    "@cairui/midway-io.client": "^1.0.3",
+    "@cairui/midway-tcpserver": "^1.0.2",
     "@midwayjs/bootstrap": "^2.11.4",
     "axios": "^0.21.1"
   }

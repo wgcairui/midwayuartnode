@@ -73,13 +73,18 @@ export class TcpServerService {
             if (!socket.Property.lock) {
                 resolve(socket)
             } else {
-                // 监听解锁
-                socket.once("unlock", resolve)
                 // 超过10s弹出错误
-                setTimeout(() => {
+                const inter = setTimeout(() => {
                     console.error(`dtu:${mac} lock timeOut`);
                     reject()
                 }, 10000);
+                // 监听解锁
+                socket.once("unlock", () => {
+                    console.log('unlock', socket.Property);
+                    clearTimeout(inter)
+                    resolve(socket)
+                })
+
             }
         })
     }
@@ -147,7 +152,6 @@ export class TcpServerService {
                 socket.Property.jw = (await this.QueryAT(socket, "LOCATE=1")).msg
                 socket.Property.uart = (await this.QueryAT(socket, "UART=1")).msg
             }
-            console.log({ p: socket.Property, AT, msg });
             this.unlock(socket)
             return socket.Property
         })

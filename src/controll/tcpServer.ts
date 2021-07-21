@@ -19,7 +19,7 @@ export class TcpControll {
     TcpServerService: TcpServerService
 
     @Inject()
-    ioClientService: ioClientService 
+    ioClientService: ioClientService
 
     @Inject()
     Fetch: Fetch
@@ -37,7 +37,7 @@ export class TcpControll {
                 socket.write(Buffer.from('+++AT+NREGDT=A,register&mac=%MAC&host=%HOST\r', "utf-8"))
                 if (this.Cache.registerConfig?.UserID) {
                     socket.write(Buffer.from(`+++AT+IOTUID=${this.Cache.registerConfig.UserID}\r`, "utf-8"))
-                } 
+                }
             }
         }, 10000);
 
@@ -113,7 +113,13 @@ export class TcpControll {
 
     @OnTCPMessage("timeout")
     async timeout() {
-        console.log(`### timeout==${this.ctx.remoteAddress}:${this.ctx.remotePort}::`);
+        console.log(`### timeout==${this.ctx.remoteAddress}:${this.ctx.remotePort}::${this.ctx.Property.mac}`);
+        this.TcpServerService.dtuOffline(this.ctx)
+    }
+
+    @OnTCPMessage("close")
+    close() {
+        console.log(`### close==${this.ctx.remoteAddress}:${this.ctx.remotePort}::${this.ctx.Property.mac}`);
         this.TcpServerService.dtuOffline(this.ctx)
     }
 }
