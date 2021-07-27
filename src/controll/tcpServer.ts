@@ -119,7 +119,7 @@ export class TcpControll {
 
     @OnTCPMessage("close")
     close() {
-        console.log(`### close==${this.ctx.remoteAddress}:${this.ctx.remotePort}::${this.ctx.Property.mac}`);
+        console.log(`### close==${this.ctx.remoteAddress}:${this.ctx.remotePort}::${this.ctx.Property ? this.ctx.Property?.mac : ''}`);
         this.TcpServerService.dtuOffline(this.ctx)
     }
 }
